@@ -35,8 +35,11 @@
       background-color: #FFF3D6; /* 浅黄色提示框 */
       border-color: #FFDCA8;
       color: #8A4B1B;
+      text-align: center;
+      padding: 15px;
+      border-radius: 8px;
     }
-    .copy-btn {
+    .copy-btn, .download-btn {
       cursor: pointer;
     }
     canvas {
@@ -45,13 +48,17 @@
       border-radius: 8px;
       background-color: #ffffff;
     }
-    footer {
-      margin-top: auto;
+    #message {
+      margin-top: 15px;
       text-align: center;
-      padding: 15px 0;
-      background-color: #f0e6de;
-      font-size: 0.9rem;
-      color: #6c4b3c;
+      color: #d63333; /* 红色错误/提示文字 */
+      font-weight: 500;
+    }
+    @media (max-width: 576px) {
+      canvas {
+        width: 80% !important;
+        height: auto !important;
+      }
     }
   </style>
 </head>
@@ -68,19 +75,20 @@
     </div>
     <button id="generate" class="btn btn-primary w-100">生成短网址</button>
 
-    <div class="result alert mt-3" id="result">
+    <div id="message"></div>
+
+    <div class="result" id="result">
       <p>生成成功：</p>
-      <div class="input-group mb-2">
-        <input type="text" class="form-control" id="shortLink" readonly>
+      <div class="input-group mb-2 justify-content-center">
+        <input type="text" class="form-control" id="shortLink" readonly style="max-width: 300px;">
         <button class="btn btn-outline-secondary copy-btn" id="copyBtn">复制</button>
       </div>
-      <canvas id="qrcode"></canvas>
+      <div class="d-flex justify-content-center flex-column align-items-center">
+        <canvas id="qrcode"></canvas>
+        <button class="btn btn-outline-secondary mt-2 download-btn" id="downloadBtn">下载二维码</button>
+      </div>
     </div>
   </div>
-
-  <footer>
-    © 2026 短网址生成
-  </footer>
 
   <script>
     const generateBtn = document.getElementById('generate');
@@ -89,14 +97,17 @@
     const resultDiv = document.getElementById('result');
     const shortLinkInput = document.getElementById('shortLink');
     const copyBtn = document.getElementById('copyBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
     const qrCanvas = document.getElementById('qrcode');
+    const messageDiv = document.getElementById('message');
 
     generateBtn.addEventListener('click', async () => {
+      messageDiv.textContent = '';
       let url = urlInput.value.trim();
       const slug = slugInput.value.trim();
 
       if (!url) {
-        alert('请填写原始链接');
+        messageDiv.textContent = '请填写原始链接';
         return;
       }
 
@@ -109,7 +120,7 @@
       if (slug) payload.slug = slug;
 
       try {
-        const res = await fetch('/create', {
+        const res = await fetch('https://d.131213.xyz/create', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -126,18 +137,28 @@
             size: 200
           });
         } else {
-          alert('生成失败，请重试');
+          messageDiv.textContent = '生成失败，请重试';
         }
       } catch (e) {
         console.error(e);
-        alert('请求出错，请检查控制台');
+        messageDiv.textContent = '请求出错，请检查控制台';
       }
     });
 
     copyBtn.addEventListener('click', () => {
       shortLinkInput.select();
       document.execCommand('copy');
-      alert('已复制到剪贴板');
+      messageDiv.textContent = '短网址已复制到剪贴板';
+      setTimeout(() => messageDiv.textContent = '', 3000);
+    });
+
+    downloadBtn.addEventListener('click', () => {
+      const link = document.createElement('a');
+      link.href = qrCanvas.toDataURL('image/png');
+      link.download = 'qrcode.png';
+      link.click();
+      messageDiv.textContent = '二维码已下载';
+      setTimeout(() => messageDiv.textContent = '', 3000);
     });
   </script>
 </body>
