@@ -2,15 +2,9 @@
 
 一个使用 Cloudflare Pages 创建的 URL 缩短器
 
+修改了首页样式，添加了二维码展示功能
+
 *Demo* : [https://short-3ud.pages.dev/](https://short-3ud.pages.dev/)
-
-
-### 利用Tencent EdgeOne Pages 部署
-> 未完成，Tencent EdgeOne的KV 存储还在申请中
-
-一键部署：
-
-[![Use EdgeOne Pages to deploy](https://cdnstatic.tencentcs.com/edgeone/pages/deploy.svg)](https://edgeone.ai/pages/new?repository-url=https://github.com/x-dr/short)
 
 
 ### 利用Cloudflare pages部署
