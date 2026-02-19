@@ -3,6 +3,11 @@
 一个使用 Cloudflare Pages 创建的 URL 缩短器
 
 修改了首页样式，添加了二维码展示功能
+添加了管理页面和日志查看
+管理/admin?pwd=你的密码
+管理的pwd在机密和变量里添加 类型文本 变量名ADMIN_PASSWORD 值就是密码
+(get明文，不安全，生产环境慎用)
+日志/logs
 
 *Demo* : [https://short-3ud.pages.dev/](https://short-3ud.pages.dev/)
 
