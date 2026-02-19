@@ -1,7 +1,7 @@
 export async function onRequest(context) {
   const { request, env } = context;
   const url = new URL(request.url);
-  const ADMIN_PASSWORD = env.ADMIN_PASSWORD || "123456";
+  const ADMIN_PASSWORD = env.ADMIN_PASSWORD;
   const pwd = url.searchParams.get("pwd");
 
   if (!pwd || pwd !== ADMIN_PASSWORD) {
@@ -59,17 +59,15 @@ export async function onRequest(context) {
         </td>
         <td>${item.status ?? 1}</td>
         <td>${escapeHtml(item.create_time)}</td>
+        <td>${escapeHtml(item.ip ?? '')}</td>
+        <td>${escapeHtml(item.ua ?? '')}</td>
         <td>
           <a href="/admin?pwd=${ADMIN_PASSWORD}&delete=${item.id}"
-             onclick="return confirm('确定删除？')">
-             删除
-          </a>
+             onclick="return confirm('确定删除？')">删除</a>
           <button 
             data-id="${item.id}" 
             data-url="${escapeHtml(item.url)}"
-            onclick="showEdit(this)">
-            修改
-          </button>
+            onclick="showEdit(this)">修改</button>
         </td>
       </tr>
     `;
@@ -87,6 +85,7 @@ export async function onRequest(context) {
       th{background:#eee}
       button{margin-left:5px;cursor:pointer}
       #editBox{display:none;margin-top:20px}
+      input[type=text]{width:400px;padding:6px}
     </style>
   </head>
   <body>
@@ -99,7 +98,9 @@ export async function onRequest(context) {
       <th>Slug</th>
       <th>URL</th>
       <th>Status</th>
-      <th>时间</th>
+      <th>创建时间</th>
+      <th>IP</th>
+      <th>UA</th>
       <th>操作</th>
     </tr>
     ${rows}
@@ -109,7 +110,7 @@ export async function onRequest(context) {
     <h3>修改链接</h3>
     <form method="POST">
       <input type="hidden" name="id" id="editId">
-      <input type="text" name="url" id="editUrl" style="width:400px">
+      <input type="text" name="url" id="editUrl">
       <button type="submit">保存</button>
     </form>
   </div>
@@ -130,6 +131,7 @@ export async function onRequest(context) {
   });
 }
 
+// ===== HTML 转义函数 =====
 function escapeHtml(str) {
   if (!str) return "";
   return str
