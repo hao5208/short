@@ -120,7 +120,7 @@
       if (slug) payload.slug = slug;
 
       try {
-        const res = await fetch('https://d.131213.xyz/create', {
+        const res = await fetch('/create', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
