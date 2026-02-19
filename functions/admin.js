@@ -1,10 +1,8 @@
 export async function onRequest(context) {
   const { request, env } = context;
   const url = new URL(request.url);
-
-  // ===== 后台密码 =====
-  const pwd = url.searchParams.get("pwd");
   const ADMIN_PASSWORD = env.ADMIN_PASSWORD || "123456";
+  const pwd = url.searchParams.get("pwd");
 
   if (!pwd || pwd !== ADMIN_PASSWORD) {
     return new Response("Forbidden", { status: 403 });
@@ -14,12 +12,14 @@ export async function onRequest(context) {
   if (url.searchParams.get("delete")) {
     const id = url.searchParams.get("delete");
 
-    await env.DB
-      .prepare("DELETE FROM links WHERE id = ?")
+    await env.DB.prepare("DELETE FROM links WHERE id = ?")
       .bind(id)
       .run();
 
-    return Response.redirect(`/admin?pwd=${ADMIN_PASSWORD}`, 302);
+    return Response.redirect(
+      new URL(`/admin?pwd=${ADMIN_PASSWORD}`, request.url),
+      302
+    );
   }
 
   // ===== 修改 =====
@@ -29,13 +29,15 @@ export async function onRequest(context) {
     const newUrl = form.get("url");
 
     if (id && newUrl) {
-      await env.DB
-        .prepare("UPDATE links SET url = ? WHERE id = ?")
+      await env.DB.prepare("UPDATE links SET url = ? WHERE id = ?")
         .bind(newUrl, id)
         .run();
     }
 
-    return Response.redirect(`/admin?pwd=${ADMIN_PASSWORD}`, 302);
+    return Response.redirect(
+      new URL(`/admin?pwd=${ADMIN_PASSWORD}`, request.url),
+      302
+    );
   }
 
   // ===== 列表 =====
@@ -58,7 +60,7 @@ export async function onRequest(context) {
         <td>${item.status ?? 1}</td>
         <td>${escapeHtml(item.create_time)}</td>
         <td>
-          <a href="/admin?pwd=${ADMIN_PASSWORD}&delete=${item.id}" 
+          <a href="/admin?pwd=${ADMIN_PASSWORD}&delete=${item.id}"
              onclick="return confirm('确定删除？')">
              删除
           </a>
@@ -80,23 +82,11 @@ export async function onRequest(context) {
     <title>链接管理</title>
     <style>
       body{font-family:Arial;padding:20px;background:#f5f6fa}
-      h2{margin-bottom:20px}
       table{width:100%;border-collapse:collapse;background:#fff}
-      td,th{border:1px solid #ddd;padding:8px;font-size:14px}
-      th{background:#f0f0f0}
-      a{color:#3498db;text-decoration:none}
-      button{padding:4px 8px;margin-left:5px;cursor:pointer}
-      #editBox{
-        display:none;
-        margin-top:20px;
-        padding:15px;
-        background:#fff;
-        border:1px solid #ddd
-      }
-      input[type=text]{
-        width:400px;
-        padding:6px
-      }
+      td,th{border:1px solid #ddd;padding:8px}
+      th{background:#eee}
+      button{margin-left:5px;cursor:pointer}
+      #editBox{display:none;margin-top:20px}
     </style>
   </head>
   <body>
@@ -119,21 +109,17 @@ export async function onRequest(context) {
     <h3>修改链接</h3>
     <form method="POST">
       <input type="hidden" name="id" id="editId">
-      <input type="text" name="url" id="editUrl">
+      <input type="text" name="url" id="editUrl" style="width:400px">
       <button type="submit">保存</button>
     </form>
   </div>
 
   <script>
     function showEdit(btn){
-      const id = btn.dataset.id;
-      const url = btn.dataset.url;
-
-      document.getElementById("editBox").style.display = "block";
-      document.getElementById("editId").value = id;
-      document.getElementById("editUrl").value = url;
-
-      window.scrollTo(0, document.body.scrollHeight);
+      document.getElementById("editBox").style.display="block";
+      document.getElementById("editId").value=btn.dataset.id;
+      document.getElementById("editUrl").value=btn.dataset.url;
+      window.scrollTo(0,document.body.scrollHeight);
     }
   </script>
 
@@ -144,13 +130,12 @@ export async function onRequest(context) {
   });
 }
 
-// ===== HTML 转义函数 =====
 function escapeHtml(str) {
   if (!str) return "";
   return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
 }
